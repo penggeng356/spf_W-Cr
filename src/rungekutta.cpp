@@ -51,7 +51,7 @@ int SPF_NS::marcusIntegral(
    }
    for( double tt=0.0; tt < 1.0; tt += rk_dt ) 
    {
-      jumpDestination = marcusRK4( marcusIntegrand,
+      jumpDestination += marcusRK4_increment( marcusIntegrand,
                                     rk_dt,
                                     jumpDestination, //accumulates over[0,1]
                                     tt, // varies from 0 to 1
@@ -60,25 +60,122 @@ int SPF_NS::marcusIntegral(
    return EXIT_SUCCESS;
 }
 
-double SPF_NS::marcusRK4( // returns y0 + contribution of integrand over dt
-                     double (*integrand)(const double& tt, 
-                                          const double& yy,
-                                          const double& poissonJump),// Y_k
-                     const double& dt, // constant rk_dt
-                     const double& y0, // will be reassigned the return value of this function
-                     const double& t0, // will vary from 0 to 1
-                     const double& jump) // will be constant while integrating t0 over [0,1]
+double SPF_NS::marcusRK4_increment( // returns y0 + contribution of integrand over dt // \Phi_{Y_k}
+                     double (*integrand)(const double& theta, 
+                                          const double& bb,
+                                          const double& dP),// Y_k
+                     const double& rk_dtheta, // constant
+                     const double& b0, // will be reassigned the return value of this function, accumulates value of the integral as t0 varies from 0 to 1
+                     const double& theta0, // will vary from 0 to 1
+                     const double& dP) // will be constant while integrating theta0 over [0,1]
 {
-   // Returns a contribution of the integral of integrand() over [t0,t0+dt] added to y0.
+   // Returns a contribution of the integral of integrand() over [theta0,theta0+rk_dtheta] added to y0.
    double k1, k2, k3, k4; 
-   k1 = dt* integrand( t0, y0, jump); // == y0*jump
-   k2 = dt* integrand( t0 + 0.5*dt, y0 + 0.5*k1, jump);
-   k3 = dt* integrand( t0 + 0.5*dt, y0 + 0.5*k2, jump);
-   k4 = dt* integrand( t0 + dt, y0 + k3, jump);
+   k1 = dP * rk_dtheta * integrand( theta0, b0, dP); // == y0*jump
+   k2 = dP * rk_dtheta * integrand( theta0 + 0.5*rk_dtheta, b0 + 0.5*k1, dP);
+   k3 = dP * rk_dtheta * integrand( theta0 + 0.5*rk_dtheta, b0 + 0.5*k2, dP);
+   k4 = dP * rk_dtheta * integrand( theta0 + rk_dtheta, b0 + k3, dP);
 
-   //std::cout << "t0: " << t0 << ", y0:" << y0  << ", dt: " << dt << ", jump: " << jump << ", k's: " << k1 << ", " << k2 << ", " << k3 << ", " << k4 << std::endl;
+   //std::cout << "t0: " << t0 << ", y0:" << y0  << ", rk_dt: " << rk_dt << ", jump: " << jump << ", k's: " << k1 << ", " << k2 << ", " << k3 << ", " << k4 << std::endl;
 
-   return y0 + ONESIXTH *(k1 + 2.0*k2 + 2.0*k3 + k4 );
+   return ONESIXTH *(k1 + 2.0*k2 + 2.0*k3 + k4 );
 }
+
+double SPF_NS::marcusRK4_increment( // returns y0 + contribution of integrand over dt // \Phi_{Y_k}
+                     double (*integrand)(const double& theta,
+                                          const double& LL,
+                                          const double& bb,
+                                          const double& dP),// Y_k
+                     const double& rk_dtheta, // constant
+                     const double& LL, // state of driving Poisson process
+                     const double& b0, // will be reassigned the return value of this function, accumulates value of the integral as t0 varies from 0 to 1
+                     const double& theta0, // will vary from 0 to 1
+                     const double& dP) // will be constant while integrating theta0 over [0,1]
+{
+   // Returns a contribution of the integral of integrand() over [theta0,theta0+rk_dtheta] added to y0.
+   double k1, k2, k3, k4; 
+   k1 = dP * rk_dtheta * integrand( theta0, LL, b0, dP); // == y0*jump
+   k2 = dP * rk_dtheta * integrand( theta0 + 0.5*rk_dtheta, LL, b0 + 0.5*k1, dP);
+   k3 = dP * rk_dtheta * integrand( theta0 + 0.5*rk_dtheta, LL, b0 + 0.5*k2, dP);
+   k4 = dP * rk_dtheta * integrand( theta0 + rk_dtheta, LL, b0 + k3, dP);
+
+   //std::cout << "t0: " << t0 << ", y0:" << y0  << ", rk_dt: " << rk_dt << ", jump: " << jump << ", k's: " << k1 << ", " << k2 << ", " << k3 << ", " << k4 << std::endl;
+
+   return ONESIXTH *(k1 + 2.0*k2 + 2.0*k3 + k4 );
+}
+
+//double SPF_NS::marcus_increment(
+//      )
+//{
+//   integrand( tau, theta0, LL, b0, dP); // == y0*jump
+//}
+
+double SPF_NS::marcusRK4_increment( // returns y0 + contribution of integrand over dt // \Phi_{Y_k}
+                     double (*integrand)(
+                                          const double& tau,
+                                          const double& theta,
+                                          const double& LL,
+                                          const double& bb,
+                                          const double& dP),// Y_k
+                     const double& tau,
+                     const double& rk_dtheta, // constant
+                     const double& LL, // state of driving Poisson process
+                     const double& b0, // will be reassigned the return value of this function, accumulates value of the integral as t0 varies from 0 to 1
+                     const double& theta0, // will vary from 0 to 1
+                     const double& dP) // will be constant while integrating theta0 over [0,1]
+{
+   // Returns a contribution of the integral of integrand() over [theta0,theta0+rk_dtheta] added to y0.
+   double k1, k2, k3, k4; 
+   k1 = dP * rk_dtheta * integrand( tau, theta0, LL, b0, dP); // == y0*jump
+   k2 = dP * rk_dtheta * integrand( tau, theta0 + 0.5*rk_dtheta, LL, b0 + 0.5*k1, dP);
+   k3 = dP * rk_dtheta * integrand( tau, theta0 + 0.5*rk_dtheta, LL, b0 + 0.5*k2, dP);
+   k4 = dP * rk_dtheta * integrand( tau, theta0 + rk_dtheta, LL, b0 + k3, dP);
+
+   //std::cout << "t0: " << t0 << ", y0:" << y0  << ", rk_dt: " << rk_dt << ", jump: " << jump << ", k's: " << k1 << ", " << k2 << ", " << k3 << ", " << k4 << std::endl;
+
+   return ONESIXTH *(k1 + 2.0*k2 + 2.0*k3 + k4 );
+}
+
+double SPF_NS::marcusRK4_increment( // returns y0 + contribution of integrand over dt // \Phi_{Y_k}
+                     double (*bIntegrand)( const double& b0,
+                                           const double& LL,
+                                           const double& tau,
+                                           const double& theta,
+                                           const double& Yk
+                                           ),
+                     double (*integrand)( // marcusIntegrand3
+                                          //const double& xTauOfTheta, // same as b0
+                                          const double& bIntegrand,
+                                          const double& tau,
+                                          const double& theta,
+                                          const double& LL,
+                                          const double& poissonJump),// Y_k
+                     const double& tau,
+                     const double& rk_dtheta, // constant
+                     const double& L0, // state of driving Poisson process
+                     const double& b0, // will be reassigned the return value of this function, accumulates value of the integral as t0 varies from 0 to 1
+                     const double& theta0, // will vary from 0 to 1
+                     const double& jump) // will be constant while integrating theta0 over [0,1]
+{
+   // Returns a contribution of the integral of integrand() over [theta0,theta0+rk_dtheta] added to y0.
+   double k1, k2, k3, k4; 
+   k1 = jump * rk_dtheta * integrand(
+         bIntegrand( b0, L0, tau, theta0, jump),
+         tau, theta0, L0, jump); // == y0*jump
+   k2 = jump * rk_dtheta * integrand(
+         bIntegrand( b0 + 0.5*k1, L0, tau, theta0, jump),
+         tau, theta0 + 0.5*rk_dtheta, L0, jump);
+   k3 = jump * rk_dtheta * integrand(
+         bIntegrand( b0 + 0.5*k2, L0, tau, theta0, jump),
+         tau, theta0 + 0.5*rk_dtheta, L0, jump);
+   k4 = jump * rk_dtheta * integrand(
+         bIntegrand( b0 + k3, L0, tau, theta0, jump),
+         tau, theta0 + rk_dtheta, L0, jump);
+
+   //std::cout << "t0: " << t0 << ", y0:" << y0  << ", rk_dt: " << rk_dt << ", jump: " << jump << ", k's: " << k1 << ", " << k2 << ", " << k3 << ", " << k4 << std::endl;
+
+   return ONESIXTH *(k1 + 2.0*k2 + 2.0*k3 + k4 );
+}
+
 
 #endif

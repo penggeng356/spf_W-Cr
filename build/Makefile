@@ -95,6 +95,9 @@ stats: $(OBJS) #$(HOBJS)
 1d-exponential: $(OBJS)
 	$(CXX) $(ROOT)/src/spf_convergencetoexponential_1d.cpp  $(OBJS) $(CXXFLAGS) $(LIBS) -o $(ROOT)/bin/spf_convergencetoexponential_1d.x
 
+1d-exponential2: $(OBJS)
+	$(CXX) $(ROOT)/src/spf_convergencetoexponential2_1d.cpp  $(OBJS) $(CXXFLAGS) $(LIBS) -o $(ROOT)/bin/spf_convergencetoexponential2_1d.x
+
 #$(CXX) $(ROOT)/src/spf_pure_gaussian.cpp $(OBJS) $(HOBJS) $(LIBS) -o $(ROOT)/bin/spf_pure_gaussian.x
 
 $(OBJS):

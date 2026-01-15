@@ -27,20 +27,79 @@
 
 namespace SPF_NS
 {
-   double marcusRK4( double (*integrand)(const double& tt, 
-                                          const double& yy,
+   double marcusRK4_increment( double (*integrand)(const double& theta, 
+                                          const double& bb,
                                           const double& poissonJump), 
-                     const double& dt, 
-                     const double& y0, 
-                     const double& t0,
+                     const double& dtheta,
+                     const double& b0,
+                     const double& theta0,
                      const double& jump);
 
-   int marcusIntegral( double (*marcusIntegrand)(const double& tt,
-                                          const double& yy,
+   double marcusRK4_increment( double (*integrand)(const double& theta, 
+                                          const double& LL,
+                                          const double& bb,
+                                          const double& poissonJump), 
+                     const double& dtheta,
+                     const double& L0, // state of driving Poisson process
+                     const double& b0,
+                     const double& theta0,
+                     const double& jump);
+
+   double marcusRK4_increment( double (*integrand)(
+                                          const double& tau, 
+                                          const double& theta, 
+                                          const double& LL,
+                                          const double& bb,
+                                          const double& poissonJump), 
+                     const double& tau,
+                     const double& dtheta,
+                     const double& L0, // state of driving Poisson process
+                     const double& b0,
+                     const double& theta0,
+                     const double& jump);
+
+   double marcusRK4_increment(
+                     double (*bIntegrand)( const double& b0,
+                                           const double& LL,
+                                           const double& tau,
+                                           const double& theta,
+                                           const double& Yk
+                                           ),
+                     double (*integrand)(
+                                          const double& bIntegrand,
+                                          const double& tau, 
+                                          const double& theta, 
+                                          const double& LL,
+                                          const double& poissonJump), 
+                     const double& tau,
+                     const double& dtheta,
+                     const double& L0, // state of driving Poisson process
+                     const double& b0,
+                     const double& theta0,
+                     const double& jump);
+
+
+   //double marcusRK4_increment( double (*bIntegrand)(
+   //                              double (*zTauTheta)(
+   //                                       const double& theta,
+   //                                       ),
+   //                                       const double& theta, 
+   //                                       const double& LL,
+   //                                       const double& bb,
+   //                                       const double& poissonJump), 
+   //                  const double& dtheta,
+   //                  const double& L0, // state of driving Poisson process
+   //                  const double& b0,
+   //                  const double& theta0,
+   //                  const double& jump);
+
+
+   int marcusIntegral( double (*marcusIntegrand)(const double& theta,
+                                          const double& bb,
                                           const double& dP), 
-                     const double& rk_dt,    // increment of unit interval
-                     const double& y0,    // path.back()
-                     const double& t0,    // t_n, t_{n+1}=t_n + dt
+                     const double& rk_dtheta,    // increment of unit interval
+                     const double& b0,    // path.back()
+                     const double& theta0,    // t_n, t_{n+1}=t_n + dt
                      const double& dP, // Y_{k} size of jump before marcus
                      double& jumpDestination);
 }

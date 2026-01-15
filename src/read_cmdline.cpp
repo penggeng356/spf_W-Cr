@@ -1302,6 +1302,15 @@ int SPF_NS::read_cmdline_options_for_escape_time_ensembles(
             idx += 1;
          }
       }
+      else if ( args[idx] == "-r" )
+      {
+         if ( idx + 1 < args.size())
+         {
+            istringstream( args[idx + 1] ) >> rate_scale_factor;
+            std::cout << "found rate_scale_factor: " << rate_scale_factor <<  std::endl; // debug
+            idx += 1;
+         }
+      }
       else if ( args[idx] == "-Nt" )
       {
          if ( idx + 1 < args.size()) 
